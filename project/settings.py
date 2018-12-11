@@ -153,6 +153,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'djangocms_fil_bootstrap',
     'parler',
+    'rangefilter',
     # 'aldryn_redirects',
 )
 
