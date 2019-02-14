@@ -5,3 +5,4 @@ media/*
 project.db
 env/*
 .DS_Store
+.history/*
