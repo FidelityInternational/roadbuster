@@ -1,0 +1,6 @@
+{
+    "package-name": "global-cms-link",
+    "installed-apps": [
+        "global_cms_link"
+    ]
+}

@@ -1,0 +1,6 @@
+{
+    "package-name": "global-cms-contact-us",
+    "installed-apps": [
+        "global_cms_contact_us"
+    ]
+}

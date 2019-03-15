@@ -1,0 +1,26 @@
+<section class="grid-container fil-contact-us {% if has_another_card %} fil-contact-us--multiple-cards {% endif %}">
+    <div class="grid-x align-center fil-contact-us__bgImage"
+            style="background-image: url({{ instance.bg_image.url }});" data-equalizer data-equalize-on="medium">
+        <div class="cell small-12 {% if not has_another_card %}medium-4 medium-offset-6{% else %} medium-8 {% endif %}">
+            <div class="grid-x fil-contact-us__card-wrapper">
+                {% for item in card_items %}
+                    <div class="cell fil-contact-us-card text-center
+                        {% if has_another_card and forloop.first %}fil-contact-us-card--second{% else %}bg-grey-50{% endif %}">
+                        <h3 class="fil-contact-us-card__title" data-equalizer-watch>{{ item.title }}</h3>
+                        <p class="fil-contact-us-card__subtitle margin-bottom-1">{{ item.sub_title }}</p>
+                        <h3 class="fil-contact-us-card__phone">{{ item.phone }}</h3>
+                        <small class="fil-contact-us-card__time margin-bottom-0 block">{{ item.time }}</small>
+                        <a class="arrow-right-cta fil-contact-us-card__link block" href="{{ item.cta.get_link }}">
+                            {% if item.cta_text %}
+                                {{ item.cta_text }}
+                            {% else %}
+                                {{ item.cta }}
+                            {% endif %}
+                            <span class="fil-icon fil-icon-arrow-r-light"></span>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>

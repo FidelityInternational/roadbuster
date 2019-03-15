@@ -1,0 +1,204 @@
+from __future__ import unicode_literals
+
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.utils.encoding import force_text
+from django.utils.encoding import python_2_unicode_compatible
+from django.utils.translation import ugettext, ugettext_lazy as _
+
+from cms.models.fields import PageField
+from cms.models.pluginmodel import CMSPlugin
+
+from djangocms_attributes_field.fields import AttributesField
+from djangocms_link.validators import IntranetURLValidator
+from filer.fields.file import FilerFileField
+
+
+TARGET_CHOICES = (
+    ('_blank', _('Open in new window')),
+    ('_self', _('Open in same window')),
+    ('_parent', _('Delegate to parent')),
+    ('_top', _('Delegate to top')),
+)
+
+
+HOSTNAME = getattr(
+    settings,
+    'DJANGOCMS_LINK_INTRANET_HOSTNAME_PATTERN',
+    None
+)
+
+
+class FilLink(models.Model):
+
+    class Meta:
+        verbose_name ='Fil Link'
+        abstract = False
+
+    search_fields = ('name',)
+
+    url_validators = [IntranetURLValidator(intranet_host_re=HOSTNAME), ]
+
+    name = models.CharField(
+        verbose_name=_('Display name'),
+        max_length=40,
+    )
+    # re: max_length, see: http://stackoverflow.com/questions/417142/
+    external_link = models.URLField(
+        verbose_name=_('External link'),
+        blank=True,
+        max_length=2040,
+        validators=url_validators,
+        help_text=_('Provide a valid URL to an external website.'),
+    )
+    internal_link = PageField(
+        limit_choices_to={
+            'is_page_type': False,
+            'publisher_is_draft': True,
+        },
+        verbose_name=_('Internal link'),
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+        help_text=_('If provided, overrides the external link.'),
+    )
+
+    file = FilerFileField(
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+    )
+
+    # other link types
+    anchor = models.CharField(
+        verbose_name=_('Anchor'),
+        blank=True,
+        max_length=255,
+        help_text=_('Appends the value only after the internal or external link. '
+                    'Do <em>not</em> include a preceding "#" symbol.'),
+    )
+    mailto = models.EmailField(
+        verbose_name=_('Email address'),
+        blank=True,
+        max_length=255,
+    )
+    phone = models.CharField(
+        verbose_name=_('Phone'),
+        blank=True,
+        max_length=255,
+    )
+    # advanced options
+    target = models.CharField(
+        verbose_name=_('Target'),
+        choices=TARGET_CHOICES,
+        blank=True,
+        max_length=255,
+    )
+    attributes = AttributesField(
+        verbose_name=_('Attributes'),
+        blank=True,
+        excluded_keys=['href', 'target'],
+    )
+
+    def __str__(self):
+        return self.name
+
+    def get_short_description(self):
+        if self.name:
+            return '{} ({})'.format(self.name, self.get_link())
+        return self.get_link() or ugettext('<link is missing>')
+
+    def get_link(self):
+        if self.internal_link:
+            ref_page = self.internal_link
+            link = ref_page.get_absolute_url()
+        elif self.external_link:
+            link = self.external_link
+        elif self.file:
+            if self.file.canonical_url:
+                link = self.file.canonical_url
+            else:
+                link = self.file.url
+        elif self.phone:
+            link = 'tel:{}'.format(self.phone.replace(' ', ''))
+        elif self.mailto:
+            link = 'mailto:{}'.format(self.mailto)
+        else:
+            link = ''
+        if (not self.phone and not self.mailto) and self.anchor:
+            link += '#{}'.format(self.anchor)
+
+        return link
+
+    def clean(self):
+        super(FilLink, self).clean()
+        field_names = (
+            'external_link',
+            'internal_link',
+            'file',
+            'mailto',
+            'phone',
+        )
+        anchor_field_name = 'anchor'
+        field_names_allowed_with_anchor = (
+            'external_link',
+            'internal_link',
+        )
+
+        anchor_field_verbose_name = force_text(
+            self._meta.get_field(anchor_field_name).verbose_name)
+        anchor_field_value = getattr(self, anchor_field_name)
+
+        link_fields = {
+            key: getattr(self, key)
+            for key in field_names
+        }
+        link_field_verbose_names = {
+            key: force_text(self._meta.get_field(key).verbose_name)
+            for key in link_fields.keys()
+        }
+        provided_link_fields = {
+            key: value
+            for key, value in link_fields.items()
+            if value
+        }
+
+        if len(provided_link_fields) > 1:
+            # Too many fields have a value.
+            verbose_names = sorted(link_field_verbose_names.values())
+            error_msg = _('Only one of {0} or {1} may be given.').format(
+                ', '.join(verbose_names[:-1]),
+                verbose_names[-1],
+            )
+            errors = {}.fromkeys(provided_link_fields.keys(), error_msg)
+            raise ValidationError(errors)
+
+        if len(provided_link_fields) == 0 and not self.anchor:
+            raise ValidationError(
+                _('Please provide a link.')
+            )
+
+        if anchor_field_value:
+            for field_name in provided_link_fields.keys():
+                if field_name not in field_names_allowed_with_anchor:
+                    error_msg = _('%(anchor_field_verbose_name)s is not allowed together with %(field_name)s') % {
+                        'anchor_field_verbose_name': anchor_field_verbose_name,
+                        'field_name': link_field_verbose_names.get(field_name)
+                    }
+                    raise ValidationError({
+                        anchor_field_name: error_msg,
+                        field_name: error_msg,
+                    })
+
+
+@python_2_unicode_compatible
+class FilLinkPluginModel(CMSPlugin):
+    link = models.ForeignKey(FilLink)
+
+    class Meta:
+        verbose_name = 'FilLinkPlugin'
+        verbose_name_plural = 'FilLinkPlugins'
+
+    def __str__(self):
+        return self.link.name

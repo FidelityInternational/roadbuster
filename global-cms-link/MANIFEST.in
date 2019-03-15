@@ -1,0 +1,6 @@
+include LICENSE
+include CHANGELOG.md
+recursive-include */boilerplates *
+recursive-include */templates *
+recursive-include */static *
+recursive-include */locale *

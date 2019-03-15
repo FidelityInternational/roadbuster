@@ -1,0 +1,10 @@
+{% load cms_tags %}{% spaceless %}
+
+
+{# this needs to be in one line for rendering purpose #}
+{% endspaceless %}
+<a href="{{ instance.link.get_link }}"{% if instance.link.target %} target="{{ instance.link.target }}"{% endif %}
+    {% if instance.link.attributes %} {{ instance.link.attributes_str }}{% endif %}>{{ instance.link.name }}
+</a>
+{% spaceless %}
+{% endspaceless %}

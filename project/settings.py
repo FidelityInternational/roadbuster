@@ -156,6 +156,8 @@ INSTALLED_APPS = (
     'djangocms_references',
     'djangocms_url_manager',
     'djangocms_pageadmin',
+    'global_cms_link',
+    'global_cms_contact_us'
 )
 
 LANGUAGES = (
