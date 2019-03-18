@@ -32,7 +32,7 @@ class ContactUsItemInline2(admin.TabularInline):
     """
 
     name = _('Contact Us Items 2')
-    model = ContactUsItemModel
+    model = ContactUsItemModel2
     max_num = 1
     extra = 1
 

@@ -66,3 +66,6 @@ class ContactUsItemModel(models.Model):
 
     def __str__(self):
         return self.title
+
+class ContactUsItemModel2(ContactUsItemModel):
+    fax = models.CharField(max_length=18)
