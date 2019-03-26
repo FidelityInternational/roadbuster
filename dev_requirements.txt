@@ -1,4 +1,4 @@
-Django==1.11.15
+Django>=1.11
 -e git+git@github.com:divio/django-cms.git@release/4.0.x#egg=django_cms
 -e git+git@github.com:FidelityInternational/djangocms-fil-admin-style.git@master#egg=djangocms_fil_admin_style
 -e git+git@github.com:FidelityInternational/djangocms-fil-bootstrap.git@master#egg=djangocms_fil_bootstrap
