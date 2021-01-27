@@ -129,6 +129,7 @@ INSTALLED_APPS = (
     'djangocms_versioning_filer',
     'filer',
     'easy_thumbnails',
+    'djangocms_alias',
     'djangocms_column',
     'djangocms_file',
     'djangocms_link',

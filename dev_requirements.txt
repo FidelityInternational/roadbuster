@@ -13,5 +13,6 @@ Django>=1.11
 -e git+git@github.com:divio/djangocms-versioning-filer.git@master#egg=djangocms_versioning_filer
 -e git+git@github.com:FidelityInternational/djangocms-references.git@master#egg=djangocms_references
 -e git+git@github.com:divio/djangocms-url-manager.git@master#egg=djangocms_url_manager
+-e git+git@github.com:divio/djangocms-alias.git@master#egg=djangocms_alias
 -e git+git@github.com:FidelityInternational/djangocms-pageadmin.git@master#egg=djangocms_pageadmin
 -r ./requirements.txt
