@@ -58,7 +58,7 @@ ipython-genutils==0.2.0
 isort==4.3.4
 jdcal==1.4
 jedi==0.12.0
-lxml==4.2.1
+lxml==4.6.3
 mccabe==0.6.1
 mock==2.0.0
 odfpy==1.3.6
